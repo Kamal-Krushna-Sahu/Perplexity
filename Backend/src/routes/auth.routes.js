@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { registerValidator } from "../validators/auth.validator.js";
-import { registerUser } from "../controllers/auth.controller.js";
+import { loginValidator, registerValidator } from "../validators/auth.validator.js";
+import { login, register } from "../controllers/auth.controller.js";
 
 const authRouter = Router();
 
@@ -10,6 +10,14 @@ const authRouter = Router();
  * @access Public
  * @body { username, email, password }
  */
-authRouter.post("/register", registerValidator, registerUser);
+authRouter.post("/register", registerValidator, register);
+
+/**
+ * @route POST /api/auth/login
+ * @desc Login User and return JWT Token
+ * @access Public
+ * @body { email, password }
+ */
+authRouter.post("/login", loginValidator, login);
 
 export default authRouter;
