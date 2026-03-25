@@ -2,6 +2,7 @@ import express from "express";
 import handleError from "./middlewares/error.middleware.js";
 import morgan from "morgan";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   }),
 );
+app.use(cookieParser());
 
 // import router
 import authRouter from "./routes/auth.routes.js";
