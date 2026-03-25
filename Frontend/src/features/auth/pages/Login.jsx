@@ -1,15 +1,35 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { useSelector } from "react-redux";
+import { Link, Navigate, useNavigate } from "react-router";
+import { useAuth } from "../hooks/useAuth.js";
 
 function Login() {
+  /** 
+    if you want to destructure in one line
+    i.e. const { user, loading } = useSelector((state) => state.auth.user);
+    it will throw an error
+    Cannot destructure property 'user' of 'useSelector(...)' as it is null.
+    so do it one by one.
+  */
+  const user = useSelector((state) => state.auth.user);
+  const loading = useSelector((state) => state.auth.loading);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleSubmit(e) {
+  const { handleLogin } = useAuth();
+
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log(email, password);
-    setEmail("");
-    setPassword("");
+    await handleLogin({ email, password });
+    navigate("/");
+  }
+
+  // logged in user can't access Login page
+  if (!loading && user) {
+    return <Navigate to="/" replace />;
   }
 
   return (
