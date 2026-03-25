@@ -4,10 +4,12 @@ import {
   registerValidator,
 } from "../validators/auth.validator.js";
 import {
+  getMe,
   login,
   register,
   verifyEmail,
 } from "../controllers/auth.controller.js";
+import authUser from "../middlewares/auth.middleware.js";
 
 const authRouter = Router();
 
@@ -26,6 +28,13 @@ authRouter.post("/register", registerValidator, register);
  * @body { email, password }
  */
 authRouter.post("/login", loginValidator, login);
+
+/**
+ * @route GET /api/auth/get-me
+ * @desc Get current logged in user's details
+ * @access Private
+ */
+authRouter.get("/get-me", authUser, getMe);
 
 /**
  * @route GET /api/auth/verify-email

@@ -2,6 +2,12 @@ import { userModel } from "../models/user.model.js";
 import { sendEmail } from "../services/mail.service.js";
 import jwt from "jsonwebtoken";
 
+/**
+ * @desc Register a new user
+ * @route POST /api/auth/register
+ * @access Public
+ * @body { username, email, password }
+ */
 export async function register(req, res) {
   const { username, email, password } = req.body;
 
@@ -45,6 +51,12 @@ export async function register(req, res) {
   });
 }
 
+/**
+ * @desc Login user and return JWT token
+ * @route POST /api/auth/login
+ * @access Public
+ * @body { email, password }
+ */
 export async function login(req, res) {
   const { email, password } = req.body;
 
@@ -101,6 +113,38 @@ export async function login(req, res) {
   });
 }
 
+/**
+ * @desc Get current logged in user's details
+ * @route GET /api/auth/get-me
+ * @access Private
+ */
+export async function getMe(req, res) {
+  console.log(req.user)
+  const userId = req.user.id;
+
+  const user = await userModel.findById(userId).select("-password");
+
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+      success: false,
+      err: "User not found",
+    });
+  }
+
+  res.status(200).json({
+    message: "User details fetched successfully",
+    success: true,
+    user,
+  });
+}
+
+/**
+ * @desc Verify user's email address
+ * @route GET /api/auth/verify-email
+ * @access Public
+ * @query { token }
+ */
 export async function verifyEmail(req, res) {
   const { token } = req.query;
 
