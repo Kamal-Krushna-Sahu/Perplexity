@@ -19,12 +19,21 @@ export async function register(req, res) {
 
   const user = await userModel.create({ username, email, password });
 
+  const emailVerificationToken = jwt.sign(
+    {
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+  );
+
   await sendEmail({
     to: email,
     subject: "Welcome to Perplexity.",
     html: `
             <p>Hi ${username}</p>
             <p>We are excited to have You.</p>
+            <p>Click the Link below to verify your Email address.</p>
+            <a href="http://localhost:3000/api/auth/verify-email?token=${emailVerificationToken}">Verify Email</a>
             <p>Best Regards<br>The Perplexity Team.</p>
           `,
   });
@@ -59,9 +68,10 @@ export async function login(req, res) {
     });
   }
 
+  // if email is not verified user can't login.
   if (!user.verified) {
     return res.status(400).json({
-      message: "Please verify your email before logging in",
+      message: "Please verify your Email before logging in",
       success: false,
       err: "Email not verified",
     });
@@ -89,4 +99,47 @@ export async function login(req, res) {
       email: user.email,
     },
   });
+}
+
+export async function verifyEmail(req, res) {
+  const { token } = req.query;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await userModel.findOne({ email: decoded.email });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid Token",
+        success: false,
+        err: "Invalid Token",
+      });
+    }
+
+    // already verified user can't verify again
+    if (user.verified) {
+      const html = `
+                <h1>Email is already verified.</h1>
+                <h2>Please Login to continue.</h2>
+                `;
+      return res.send(html);
+    }
+
+    user.verified = true;
+    await user.save();
+
+    const html = `
+                <h1>Email verified successfully.</h1>
+                <h2>Now you can Login to your account.</h2>
+                `;
+
+    return res.send(html);
+  } catch (error) {
+    return res.status(400).json({
+      message: "Invalid or expired Token",
+      success: false,
+      err: err.message || "Invalid Token",
+    });
+  }
 }
