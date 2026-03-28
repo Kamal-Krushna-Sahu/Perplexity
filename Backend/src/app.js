@@ -21,9 +21,11 @@ app.use(cookieParser());
 
 // import router
 import authRouter from "./routes/auth.routes.js";
+import chatRouter from "./routes/chat.routes.js";
 
 // use router
 app.use("/api/auth", authRouter);
+app.use("/api/chats", chatRouter);
 
 // error middleware at last
 app.use(handleError);
