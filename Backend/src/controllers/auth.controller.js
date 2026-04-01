@@ -119,7 +119,6 @@ export async function login(req, res) {
  * @access Private
  */
 export async function getMe(req, res) {
-  console.log(req.user)
   const userId = req.user.id;
 
   const user = await userModel.findById(userId).select("-password");
