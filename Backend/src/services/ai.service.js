@@ -13,7 +13,7 @@ const mistralModel = new ChatMistralAI({
 });
 
 export async function generateResponse(allMessages) {
-  const response = await geminiModel.invoke(
+  const response = await mistralModel.invoke(
     allMessages.map((msg) => {
       if (msg.role === "user") {
         return new HumanMessage(msg.content);

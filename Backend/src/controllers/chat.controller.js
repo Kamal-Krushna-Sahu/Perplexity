@@ -2,21 +2,37 @@ import { generateChatTitle, generateResponse } from "../services/ai.service.js";
 import chatModel from "../models/chat.model.js";
 import messageModel from "../models/message.model.js";
 
+export async function createNewChat(req, res) {
+  const { message } = req.body;
+
+  const chatTitle = await generateChatTitle(message);
+
+  const newChat = await chatModel.create({
+    user: req.user.id,
+    title: chatTitle,
+  });
+
+  res.status(201).json({
+    message: "New Chat created successfully",
+    chatId: newChat._id,
+  });
+}
+
 export async function sendMessage(req, res) {
   const { message, chatId } = req.body;
 
-  let chatTitle = null,
-    newChat = null;
+  // let chatTitle = null,
+  //   newChat = null;
 
   // if no chatId is given, then only create title & new chat
-  if (!chatId) {
-    chatTitle = await generateChatTitle(message);
+  // if (!chatId) {
+  //   chatTitle = await generateChatTitle(message);
 
-    newChat = await chatModel.create({
-      user: req.user.id,
-      title: chatTitle,
-    });
-  }
+  //   newChat = await chatModel.create({
+  //     user: req.user.id,
+  //     title: chatTitle,
+  //   });
+  // }
 
   // in a follow up message, check if the chat exists with the chatId & requesting user
   if (chatId) {
@@ -34,27 +50,29 @@ export async function sendMessage(req, res) {
   }
 
   const userMessage = await messageModel.create({
-    chat: chatId || newChat._id,
+    // chat: chatId || newChat._id,
+    chat: chatId,
     content: message,
     role: "user",
   });
 
   const allMessages = await messageModel.find({
-    chat: chatId || newChat._id,
+    // chat: chatId || newChat._id,
+    chat: chatId,
     // chat: { $in: [chatId, newChat?._id] }, // read about $in operator
   });
 
   const aiResponse = await generateResponse(allMessages);
 
   const aiMessage = await messageModel.create({
-    chat: chatId || newChat._id,
+    // chat: chatId || newChat._id,
+    chat: chatId,
     content: aiResponse,
     role: "ai",
   });
 
   res.status(201).json({
-    title: chatTitle,
-    chat: newChat,
+    message: "Response generated successfully",
     aiMessage,
   });
 }
