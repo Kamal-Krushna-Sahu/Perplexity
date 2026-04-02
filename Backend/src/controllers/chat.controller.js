@@ -80,7 +80,7 @@ export async function sendMessage(req, res) {
 export async function getAllChats(req, res) {
   const user = req.user;
 
-  const chats = await chatModel.find({ user: user.id });
+  const chats = await chatModel.find({ user: user.id }).sort({ createdAt: -1 });
 
   res.status(200).json({
     message: "All chats fetched successfully",
